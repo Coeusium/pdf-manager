@@ -5,7 +5,7 @@ const routes = new Router();
 const {PDFDocument} = require('pdf-lib');
 const {makeid} = require('../utilities/utilities');
 
-const {listPdfs, getPdf, addPdf, getChildrenPdfs, searchPdfs, updatePdfName} = require('../utilities/pdf-utilities');
+const {listPdfs, getPdf, addPdf, getChildrenPdfs, searchPdfs, updatePdfName, updatePdfPages} = require('../utilities/pdf-utilities');
 const {listPdfTagsByPdfId, addPdfTag} = require('../utilities/pdf-tag-utilities');
 
 const dbInfo = require('../dbInfo');
@@ -28,6 +28,7 @@ routes.get('/', async (ctx) => {
 routes.post('/', async (ctx) => {
     const {pdf_id, name} = ctx.query;
     await updatePdfName(dbInfo, pdf_id, name);
+    ctx.body = {};
 });
 
 routes.get('/file', async (ctx) => {
@@ -36,6 +37,18 @@ routes.get('/file', async (ctx) => {
     ctx.type = 'application/pdf';
     ctx.attachment(`${pdfInfo.name}.pdf`, {type: 'inline'});
     ctx.body = await fs.readFile(pdfInfo.file_location);
+});
+
+routes.delete('/file', async (ctx) => {
+    const {pdf_id, pages} = ctx.query;
+    const pdfInfo = await getPdf(dbInfo, pdf_id);
+    const pdf = await PDFDocument.load(await fs.readFile(pdfInfo.file_location));
+    const finalPages = JSON.parse(pages).filter(e => e < pdf.getPageCount()).sort();
+    let pagesDeleted = 0;
+    finalPages.forEach(e => pdf.removePage(e - pagesDeleted++));
+    const finalDoc = await pdf.save();
+    await fs.writeFile(pdfInfo.file_location, finalDoc);
+    ctx.body = {};
 });
 
 routes.post('/file', async (ctx) => {

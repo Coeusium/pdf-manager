@@ -29,6 +29,12 @@ async function updatePdfName(dbInfo, pdf_id, name) {
     await execute(dbInfo, sql, [name, pdf_id]);
 }
 
+async function updatePdfPages(dbInfo, pdf_id, pages) {
+    const sql = `UPDATE pdf SET pages = ? WHERE pdf_id = ?;`;
+    await execute(dbInfo, sql, [pages, pdf_id]);
+}
+
+
 async function addPdf(dbInfo, filePath, parent = '') {
     const name = path.basename(filePath.replace('.pdf', ''));
     let sql = `INSERT INTO pdf (pdf_id, size, name, pages, file_location`;
@@ -77,5 +83,6 @@ module.exports = {
     searchPdfs,
     getPdf,
     getChildrenPdfs,
-    updatePdfName
+    updatePdfName,
+    updatePdfPages
 }

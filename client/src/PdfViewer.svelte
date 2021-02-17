@@ -8,17 +8,32 @@
 
     let title = '';
     let children = '';
+    let toDelete = '';
     let newTags = '';
     let newName = '';
+    let src = `/api/pdf/file?pdf_id=${pdf_id}`;
     let tags = [];
 
     async function handleAddChildren() {
         const pageList = children.split(",")
             .map(e => e.replace(/ $/, '').replace(/^ /, ''))
             .map(e => parseInt(e))
-            .filter(e => !isNaN(e));
+            .filter(e => !isNaN(e))
+            .map(e => e - 1);
         await fetch(`/api/pdf/file?pdf_id=${pdf_id}&pages=${JSON.stringify(pageList)}`, {method: 'POST'});
         children = '';
+    }
+
+    async function handleDeletePages() {
+        const pageList = toDelete.split(",")
+            .map(e => e.replace(/ $/, '').replace(/^ /, ''))
+            .map(e => parseInt(e))
+            .filter(e => !isNaN(e))
+            .map(e => e - 1);
+        console.log(pageList);
+        await fetch(`/api/pdf/file?pdf_id=${pdf_id}&pages=${JSON.stringify(pageList)}`, {method: 'DELETE'});
+        children = '';
+        src = src;
     }
 
     async function getTags() {
@@ -53,18 +68,27 @@
 
 </script>
 
-<div style="display: flex;">
+<div>
     <label>
+        Save Pages To Child
         <input type="text" placeholder="separate pages by commas" bind:value={children}>
         <button on:click={handleAddChildren}>Submit</button>
     </label>
 
     <label>
+        Delete Pages
+        <input type="text" placeholder="separate pages by commas" bind:value={toDelete}>
+        <button on:click={handleDeletePages}>Submit</button>
+    </label>
+
+    <label>
+        Add Tags
         <input type="text" placeholder="separate tags by commas" bind:value={newTags}>
         <button on:click={handleAddTags}>Submit</button>
     </label>
 
     <label>
+        Change Name
         <input type="text" placeholder={title} bind:value={newName}>
         <button on:click={handleChangeName}>Submit</button>
     </label>
@@ -76,9 +100,13 @@
     {/each}
 </div>
 
-<iframe title={title} src={`/api/pdf/file?pdf_id=${pdf_id}`}></iframe>
+<iframe title={title} src={src}></iframe>
 
 <style>
+    input {
+        width: 320px;
+    }
+
     iframe {
         width: 100%;
         height: 100%;
