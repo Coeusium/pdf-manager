@@ -30,10 +30,12 @@
             .map(e => parseInt(e))
             .filter(e => !isNaN(e))
             .map(e => e - 1);
-        console.log(pageList);
         await fetch(`/api/pdf/file?pdf_id=${pdf_id}&pages=${JSON.stringify(pageList)}`, {method: 'DELETE'});
         children = '';
-        src = src;
+        // trigger refresh
+        const tmpSrc = src;
+        src = '';
+        setTimeout(() => src = tmpSrc, 0);
     }
 
     async function getTags() {

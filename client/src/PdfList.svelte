@@ -1,6 +1,7 @@
 <script>
     import {onMount} from 'svelte';
     import PdfResult from "./PdfResult.svelte";
+    import Tag from "./Tag.svelte";
 
     let limit = 20;
     let page = 0;
@@ -8,10 +9,19 @@
     let order = 'asc';
     let orderedBy = 'name';
     let term = '';
+    let tags = [];
+
     $: {
         (async () => {
             const res = await fetch(`/api/pdf?limit=${limit}&page=${page}&order=${order}&order_by=${orderedBy}&term=${term}`);
             data = await res.json();
+
+            if(!term) {
+                tags = [];
+            } else {
+                const res2 = await fetch(`/api/tag/search?tagQ=${term}`);
+                tags = await res2.json();
+            }
         })();
     }
 
@@ -52,6 +62,11 @@
     Search
     <input type="text" bind:value={term}>
 </label>
+<div style="display: flex;">
+    {#each tags as tag}
+        <Tag tag_id={tag.tag_id} displayCount={true}/>
+    {/each}
+</div>
 <div class="pdf-table-container">
     <table>
         <tr>
@@ -76,8 +91,8 @@
     }
 
     th:hover {
-        color:black;
-        background-color:white;
+        color: black;
+        background-color: white;
     }
 
     .pdf-table-container {

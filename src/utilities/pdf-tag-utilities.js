@@ -11,6 +11,16 @@ async function createPdfTagTable(dbInfo) {
     await execute(dbInfo, createPdfTable);
 }
 
+async function tagCount(dbInfo, tag_id) {
+    const sql = `SELECT COUNT(*) FROM pdf_tag WHERE tag_id = ?;`;
+    return (await execute(dbInfo, sql, [tag_id]))[0]["COUNT(*)"];
+}
+
+async function tagSearch(dbInfo, tagQ) {
+    const sql = `SELECT * from tag WHERE tag LIKE '%${tagQ}%';`;
+    return execute(dbInfo, sql);
+}
+
 async function addPdfTag(dbInfo, pdf_id, tag_id) {
     const sql = `INSERT INTO pdf_tag (pdf_id, tag_id) VALUES (?, ?);`;
     await execute(dbInfo, sql, [pdf_id, tag_id]);
@@ -36,5 +46,7 @@ module.exports = {
     addPdfTag,
     listPdfTagsByPdfId,
     listPdfTagsByTagId,
-    deletePdfTag
+    deletePdfTag,
+    tagCount,
+    tagSearch
 };
