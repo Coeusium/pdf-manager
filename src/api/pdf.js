@@ -5,7 +5,7 @@ const routes = new Router();
 const {PDFDocument} = require('pdf-lib');
 const {makeid} = require('../utilities/utilities');
 
-const {listPdfs, getPdf, addPdf, getChildrenPdfs, searchPdfs} = require('../utilities/pdf-utilities');
+const {listPdfs, getPdf, addPdf, getChildrenPdfs, searchPdfs, updatePdfName} = require('../utilities/pdf-utilities');
 const {listPdfTagsByPdfId, addPdfTag} = require('../utilities/pdf-tag-utilities');
 
 const dbInfo = require('../dbInfo');
@@ -23,6 +23,11 @@ routes.get('/', async (ctx) => {
             ctx.body = await listPdfs(dbInfo, order_by, order, page, limit);
         }
     }
+});
+
+routes.post('/', async (ctx) => {
+    const {pdf_id, name} = ctx.query;
+    await updatePdfName(dbInfo, pdf_id, name);
 });
 
 routes.get('/file', async (ctx) => {

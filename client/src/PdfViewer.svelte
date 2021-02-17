@@ -9,6 +9,7 @@
     let title = '';
     let children = '';
     let newTags = '';
+    let newName = '';
     let tags = [];
 
     async function handleAddChildren() {
@@ -35,11 +36,20 @@
         newTags = '';
     }
 
-    onMount(async () => {
+    async function handleChangeName() {
+        await fetch(`/api/pdf?pdf_id=${pdf_id}&name=${newName}`, {method: 'POST'});
+        newName = '';
+        await getTitle();
+    }
+
+    async function getTitle() {
         const res = await fetch(`/api/pdf?pdf_id=${pdf_id}`);
         title = (await res.json()).name;
+        newName = title;
         await getTags();
-    });
+    }
+
+    onMount(getTitle);
 
 </script>
 
@@ -52,6 +62,11 @@
     <label>
         <input type="text" placeholder="separate tags by commas" bind:value={newTags}>
         <button on:click={handleAddTags}>Submit</button>
+    </label>
+
+    <label>
+        <input type="text" placeholder={title} bind:value={newName}>
+        <button on:click={handleChangeName}>Submit</button>
     </label>
 </div>
 
