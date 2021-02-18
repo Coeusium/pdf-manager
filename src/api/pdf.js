@@ -5,25 +5,28 @@ const routes = new Router();
 const {PDFDocument} = require('pdf-lib');
 const {makeid} = require('../utilities/utilities');
 
-const {listPdfs, getPdf, addPdf, getChildrenPdfs, searchPdfs, updatePdfName, updatePdfPages} = require('../utilities/pdf-utilities');
+const {listPdfs, getPdf, addPdf, getChildrenPdfs, searchPdfs, updatePdfName, updatePdfPages, searchPdfsTags} = require('../utilities/pdf-utilities');
 const {listPdfTagsByPdfId, addPdfTag} = require('../utilities/pdf-tag-utilities');
 
 const dbInfo = require('../dbInfo');
 
 routes.get('/', async (ctx) => {
     const {page, limit, pdf_id, parent_id, order, order_by, term, tags} = ctx.query;
+
+
     if (pdf_id) {
         ctx.body = await getPdf(dbInfo, pdf_id);
     } else if (parent_id) {
         ctx.body = await getChildrenPdfs(dbInfo, parent_id, page, limit);
     } else {
-        if (term) {
+        if (term || tags !== '[]') {
+            if (tags) {
+                ctx.body = await searchPdfsTags(dbInfo, term, JSON.parse(tags), order_by, order, page, limit);
+            } else {
                 ctx.body = await searchPdfs(dbInfo, term, order_by, order, page, limit);
-            // if (tags) {
-            //     ctx.body = await searchPdfsTags(dbInfo, term, JSON.parse(tags), order_by, order, page, limit);
-            // } else {
-            // }
+            }
         } else {
+            console.log('??');
             ctx.body = await listPdfs(dbInfo, order_by, order, page, limit);
         }
     }

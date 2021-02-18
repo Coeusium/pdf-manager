@@ -48,13 +48,18 @@ async function tagSearchWithTags(dbInfo, term = '', tags = [], type = 'name', or
                WHERE pdf_tag.tag_id = tag.tag_id
                AND tag LIKE "%${term}%"
                AND (pdf_tag.pdf_id IN 
-                 (SELECT pdf_tag.pdf_id
-                 FROM pdf_tag, pdf, tag
-                 WHERE pdf_tag.tag_id = tag.tag_id
-                 AND (tag.tag_id IN (${tags.map(e => `'${e}'`)}))
-                 AND pdf.pdf_id = pdf_tag.pdf_id)
+                 (SELECT p.pdf_id
+                    FROM pdf_tag pt, pdf p, tag t
+                    WHERE pt.tag_id = t.tag_id  
+                    AND (t.tag_id IN (${tags.map(e => `'${e}'`)}))
+                    AND p.pdf_id = pt.pdf_id
+                    GROUP BY p.pdf_id
+                    HAVING COUNT( p.pdf_id )=${tags.length})
                )
-               AND pdf.pdf_id = pdf_tag.pdf_id LIMIT ? OFFSET?;`;
+               AND pdf.pdf_id = pdf_tag.pdf_id
+               GROUP BY pdf_tag.tag_id
+               LIMIT ? OFFSET ?;`;
+    console.log(sql);
     return (await execute(dbInfo, sql, [limit, (page * limit)]));
 }
 

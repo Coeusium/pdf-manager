@@ -44,6 +44,7 @@ const searchRouter = new Router();
 searchRouter.get('/', async (ctx) => {
     const {tagQ, tags} = ctx.query;
     if (tags) {
+        console.log('?');
         ctx.body = await tagSearchWithTags(dbInfo, tagQ, JSON.parse(tags));
     } else {
         ctx.body = await tagSearch(dbInfo, tagQ);

@@ -19,25 +19,29 @@
             ...(Array.from(tags).map(e => e.tag_id)),
             ...selectedTags
         ]);
-        console.log(combinedTags);
     }
 
-    async function search() {
+    async function pdfSearch() {
         const searchTags = Array.from(selectedTags.keys());
         const res = await fetch(`/api/pdf?limit=${limit}&page=${page}&order=${order}&order_by=${orderedBy}&term=${term}&tags=${searchTags.length === 0 ? '' : JSON.stringify(searchTags)}`);
         data = await res.json();
     }
 
+    async function tagSearch() {
+        if (term || selectedTags.size > 0) {
+            const searchTags = Array.from(selectedTags.keys());
+            const res2 = await fetch(`/api/tag/search?tagQ=${term}&tags=${searchTags.length === 0 ? '' : JSON.stringify(searchTags)}`);
+            tags = new Set(await res2.json());
+        } else {
+            tags = [];
+        }
+    }
+
     $: {
         (async () => {
-            await search();
-
             if (term) {
-                const searchTags = Array.from(selectedTags.keys());
-                const res2 = await fetch(`/api/tag/search?tagQ=${term}&tags=${searchTags.length === 0 ? '' : JSON.stringify(searchTags)}`);
-                tags = new Set(await res2.json());
-            } else {
-                tags = [];
+                await pdfSearch();
+                await tagSearch();
             }
         })();
     }
@@ -51,6 +55,8 @@
         // force refresh
         const tmpSet = selectedTags;
         selectedTags = tmpSet;
+        await pdfSearch();
+        await tagSearch();
     }
 
     async function orderBy(type) {
@@ -61,10 +67,11 @@
             orderedBy = type;
         }
 
-        await search();
+        await pdfSearch();
     }
 
-    onMount(() => {
+    onMount(async () => {
+        await pdfSearch();
         document.body.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') {
                 if (page > 0) page--;
