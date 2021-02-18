@@ -51,6 +51,7 @@
             selectedTags.delete(tag_id)
         } else {
             selectedTags.add(tag_id);
+            term = '';
         }
         // force refresh
         const tmpSet = selectedTags;
