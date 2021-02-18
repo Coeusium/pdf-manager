@@ -18,13 +18,14 @@
 
 </script>
 
-<div>{tag}{displayCount ? `: ${count}` : ''}</div>
+<div>
+    <span>{tag}</span><span style="user-select: none;">{displayCount ? `: ${count}` : ''}</span>
+</div>
 
 <style>
     div {
-        margin: 8px;
         background-color: #eee;
         padding: 8px;
-
+        border-radius: 8px;
     }
 </style>

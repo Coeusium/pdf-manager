@@ -11,14 +11,18 @@ const {listPdfTagsByPdfId, addPdfTag} = require('../utilities/pdf-tag-utilities'
 const dbInfo = require('../dbInfo');
 
 routes.get('/', async (ctx) => {
-    const {page, limit, pdf_id, parent_id, order, order_by, term} = ctx.query;
+    const {page, limit, pdf_id, parent_id, order, order_by, term, tags} = ctx.query;
     if (pdf_id) {
         ctx.body = await getPdf(dbInfo, pdf_id);
     } else if (parent_id) {
         ctx.body = await getChildrenPdfs(dbInfo, parent_id, page, limit);
     } else {
         if (term) {
-            ctx.body = await searchPdfs(dbInfo, term, order_by, order, page, limit);
+                ctx.body = await searchPdfs(dbInfo, term, order_by, order, page, limit);
+            // if (tags) {
+            //     ctx.body = await searchPdfsTags(dbInfo, term, JSON.parse(tags), order_by, order, page, limit);
+            // } else {
+            // }
         } else {
             ctx.body = await listPdfs(dbInfo, order_by, order, page, limit);
         }
@@ -48,6 +52,7 @@ routes.delete('/file', async (ctx) => {
     finalPages.forEach(e => pdf.removePage(e - pagesDeleted++));
     const finalDoc = await pdf.save();
     await fs.writeFile(pdfInfo.file_location, finalDoc);
+    await updatePdfPages(dbInfo, pdf_id, pdf.getPageCount());
     ctx.body = {};
 });
 
@@ -69,7 +74,7 @@ routes.post('/file', async (ctx) => {
     let page = 0;
     let result = await listPdfTagsByPdfId(dbInfo, finalId, page++, 20);
     while (result.length > 0) {
-        for(const {tag_id} of result) {
+        for (const {tag_id} of result) {
             await addPdfTag(dbInfo, newPdfId, tag_id);
         }
 

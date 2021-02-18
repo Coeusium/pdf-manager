@@ -74,6 +74,24 @@ async function getChildrenPdfs(dbInfo, parent_id, page = 0, limit = 20) {
     const sql = `SELECT * FROM pdf WHERE parent_id = ? LIMIT ? OFFSET ?;`;
     return (await execute(dbInfo, sql, [parent_id, limit, (page * limit)]));
 }
+//
+// async function tagSearchWithTags(dbInfo, term = '', tags = [], type = 'name', order = 'ASC', page = 0, limit = 20) {
+//     if (tags.length === 0) return [];
+//     console.log(tags);
+//     let sql = `SELECT DISTINCT tag.*
+//                FROM pdf_tag, pdf, tag
+//                WHERE pdf_tag.tag_id = tag.tag_id
+//                AND tag LIKE "%${term}%"
+//                AND (pdf_tag.pdf_id IN
+//                  (SELECT pdf_tag.pdf_id
+//                  FROM pdf_tag, pdf, tag
+//                  WHERE pdf_tag.tag_id = tag.tag_id
+//                  AND (tag.tag_id IN (${tags.map(e => `'${e}'`)}))
+//                  AND pdf.pdf_id = pdf_tag.pdf_id)
+//                )
+//                AND pdf.pdf_id = pdf_tag.pdf_id LIMIT ? OFFSET?;`;
+//     return (await execute(dbInfo, sql, [limit, (page * limit)]));
+// }
 
 module.exports = {
     createDatabase,

@@ -9,20 +9,48 @@
     let order = 'asc';
     let orderedBy = 'name';
     let term = '';
-    let tags = [];
+    let tags = new Set();
+    let selectedTags = new Set();
+
+    let combinedTags;
+
+    $: {
+        combinedTags = new Set([
+            ...(Array.from(tags).map(e => e.tag_id)),
+            ...selectedTags
+        ]);
+        console.log(combinedTags);
+    }
+
+    async function search() {
+        const searchTags = Array.from(selectedTags.keys());
+        const res = await fetch(`/api/pdf?limit=${limit}&page=${page}&order=${order}&order_by=${orderedBy}&term=${term}&tags=${searchTags.length === 0 ? '' : JSON.stringify(searchTags)}`);
+        data = await res.json();
+    }
 
     $: {
         (async () => {
-            const res = await fetch(`/api/pdf?limit=${limit}&page=${page}&order=${order}&order_by=${orderedBy}&term=${term}`);
-            data = await res.json();
+            await search();
 
-            if(!term) {
-                tags = [];
+            if (term) {
+                const searchTags = Array.from(selectedTags.keys());
+                const res2 = await fetch(`/api/tag/search?tagQ=${term}&tags=${searchTags.length === 0 ? '' : JSON.stringify(searchTags)}`);
+                tags = new Set(await res2.json());
             } else {
-                const res2 = await fetch(`/api/tag/search?tagQ=${term}`);
-                tags = await res2.json();
+                tags = [];
             }
         })();
+    }
+
+    async function toggleTag(tag_id) {
+        if (selectedTags.has(tag_id)) {
+            selectedTags.delete(tag_id)
+        } else {
+            selectedTags.add(tag_id);
+        }
+        // force refresh
+        const tmpSet = selectedTags;
+        selectedTags = tmpSet;
     }
 
     async function orderBy(type) {
@@ -33,8 +61,7 @@
             orderedBy = type;
         }
 
-        const res = await fetch(`/api/pdf?limit=${limit}&page=${page}&order=${order}&order_by=${orderedBy()}&term=${term}`);
-        data = await res.json();
+        await search();
     }
 
     onMount(() => {
@@ -63,8 +90,11 @@
     <input type="text" bind:value={term}>
 </label>
 <div style="display: flex;">
-    {#each tags as tag}
-        <Tag tag_id={tag.tag_id} displayCount={true}/>
+    {#each Array.from(combinedTags) as tag}
+        <div on:click={() => toggleTag(tag)} style="margin: 8px;"
+             class={selectedTags.has(tag) ? "selected-tag" : ''}>
+            <Tag tag_id={tag} displayCount={true}/>
+        </div>
     {/each}
 </div>
 <div class="pdf-table-container">
@@ -82,6 +112,11 @@
 </div>
 
 <style>
+    .selected-tag {
+        border-radius: 8px;
+        border: 4px solid gold;
+    }
+
     th {
         margin: 0;
         padding: 16px;

@@ -1,7 +1,7 @@
 const {getTagScopedRouter, setupTagSystem} = require('sql-tag-system-koa-route');
 const Router = require('@koa/router');
 const dbInfo = require('../dbInfo');
-const {addPdfTag, deletePdfTag, listPdfTagsByPdfId, listPdfTagsByTagId, createPdfTagTable, tagCount, tagSearch} = require('../utilities/pdf-tag-utilities');
+const {addPdfTag, deletePdfTag, listPdfTagsByPdfId, listPdfTagsByTagId, createPdfTagTable, tagCount, tagSearch, tagSearchWithTags} = require('../utilities/pdf-tag-utilities');
 
 setupTagSystem(dbInfo).then(() => createPdfTagTable(dbInfo).then(() => {
 }));
@@ -42,8 +42,12 @@ countRouter.get('/', async (ctx) => {
 const searchRouter = new Router();
 
 searchRouter.get('/', async (ctx) => {
-    const {tagQ} = ctx.query;
-    ctx.body = await tagSearch(dbInfo, tagQ);
+    const {tagQ, tags} = ctx.query;
+    if (tags) {
+        ctx.body = await tagSearchWithTags(dbInfo, tagQ, JSON.parse(tags));
+    } else {
+        ctx.body = await tagSearch(dbInfo, tagQ);
+    }
 })
 
 router.use('/tag/pdf', pdfRouter.routes(), pdfRouter.allowedMethods());
