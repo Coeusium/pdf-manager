@@ -2,7 +2,7 @@
     import {onMount} from 'svelte';
     import {querystring} from 'svelte-spa-router'
     import queryString from 'query-string';
-    import Tag from "./Tag.svelte";
+    import Tag, {tag_id} from "./Tag.svelte";
 
     const {pdf_id} = queryString.parse($querystring);
 
@@ -11,8 +11,38 @@
     let toDelete = '';
     let newTags = '';
     let newName = '';
+    let showModal = false;
     let src = `/api/pdf/file?pdf_id=${pdf_id}`;
     let tags = [];
+
+    let tagToDelete = '';
+    let tagToDeleteName = ''
+
+    $: {
+        (async () => {
+            const res = await fetch(`/api/tag?tag_id=${tagToDelete}`);
+            const data = await res.json();
+            tagToDeleteName = data.tag;
+        })();
+    }
+
+    function handleConfirmDelete(tag_id) {
+        tagToDelete = tag_id;
+        showModal = true;
+        console.log(tagToDelete);
+    }
+
+    function unsetDelete() {
+        tagToDelete = '';
+        tagToDeleteName = '';
+        showModal = false;
+    }
+
+    async function handleDeleteTag() {
+        await fetch(`/api/tag/pdf?tag_id=${tagToDelete}&pdf_id=${pdf_id}`, {method: 'DELETE'});
+        unsetDelete();
+        await getTags();
+    }
 
     async function handleAddChildren() {
         const pageList = children.split(",")
@@ -98,13 +128,58 @@
 
 <div style="display: flex;">
     {#each tags as tag}
-        <Tag tag_id={tag.tag_id}/>
+        <div on:click={() => handleConfirmDelete(tag.tag_id)}>
+            <Tag tag_id={tag.tag_id}/>
+        </div>
     {/each}
 </div>
 
 <iframe title={title} src={src}></iframe>
 
+{#if showModal}
+    <div on:click|self={unsetDelete} class="delete-modal">
+        <div class="confirm-delete">
+            <h1>Delete?</h1>
+            <h2 style="text-align: center;">{tagToDeleteName}</h2>
+            <div class="confirm-buttons">
+                <button on:click={handleDeleteTag}>Yes</button>
+                <button on:click={unsetDelete}>No</button>
+            </div>
+        </div>
+    </div>
+{/if}
+
 <style>
+    .delete-modal {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .confirm-buttons {
+        margin-top: 12px;
+    }
+
+    .confirm-delete {
+        background-color: white;
+        border-radius: 8px;
+        padding: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    h1 {
+        color: black;
+    }
+
     input {
         width: 320px;
     }

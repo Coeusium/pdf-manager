@@ -1,4 +1,5 @@
 const {execute} = require('@almaclaine/mysql-utils');
+const {deleteTag} = require('sql-tag-system');
 
 async function createPdfTagTable(dbInfo) {
     const createPdfTable = `CREATE TABLE IF NOT EXISTS pdf_tag (
@@ -29,6 +30,8 @@ async function addPdfTag(dbInfo, pdf_id, tag_id) {
 async function deletePdfTag(dbInfo, pdf_id, tag_id) {
     const sql = `DELETE FROM pdf_tag where pdf_id = ? AND tag_id = ?;`;
     await execute(dbInfo, sql, [pdf_id, tag_id]);
+    const numTags = await tagCount(dbInfo, tag_id);
+    if(numTags === 0) await deleteTag(dbInfo, tag_id);
 }
 
 async function listPdfTagsByPdfId(dbInfo, pdf_id, page = 0, limit = 20) {
