@@ -73,9 +73,9 @@
     let maxPage = 0;
 
     async function handleDeletePagesRange() {
-        if(minPage === 0 || maxPage === 0) return;
+        if (minPage === 0 || maxPage === 0) return;
         const pageList = [];
-        for(let i = minPage; i <= maxPage; i++) pageList.push(i - 1);
+        for (let i = minPage; i <= maxPage; i++) pageList.push(i - 1);
         console.log(pageList);
         minPage = 0;
         maxPage = 0;
@@ -121,40 +121,42 @@
 </script>
 
 {#if openControls}
-    <label>
-        Save Pages To Child
-        <input type="text" placeholder="separate pages by commas" bind:value={children}>
-        <button on:click={handleAddChildren}>Submit</button>
-    </label>
+    <div class="controls">
+        <label>
+            Save Pages To Child
+            <input type="text" placeholder="separate pages by commas" bind:value={children}>
+            <button on:click={handleAddChildren}>Submit</button>
+        </label>
 
-    <label>
-        Delete Pages
-        <input type="text" placeholder="separate pages by commas" bind:value={toDelete}>
-        <button on:click={handleDeletePages}>Submit</button>
-    </label>
-    <label>
-        Delete Pages min/max
-        <input type="number" min={0} bind:value={minPage}>
-        <input type="number" min={0} bind:value={maxPage}>
-        <button on:click={handleDeletePagesRange}>Submit</button>
-    </label>
-    <label>
-        Add Tags
-        <input type="text" placeholder="separate tags by commas" bind:value={newTags}>
-        <button on:click={handleAddTags}>Submit</button>
-    </label>
+        <label>
+            Delete Pages
+            <input type="text" placeholder="separate pages by commas" bind:value={toDelete}>
+            <button on:click={handleDeletePages}>Submit</button>
+        </label>
+        <label>
+            Delete Pages min/max
+            <input type="number" min={0} bind:value={minPage}>
+            <input type="number" min={0} bind:value={maxPage}>
+            <button on:click={handleDeletePagesRange}>Submit</button>
+        </label>
+        <label>
+            Add Tags
+            <input type="text" placeholder="separate tags by commas" bind:value={newTags}>
+            <button on:click={handleAddTags}>Submit</button>
+        </label>
 
-    <label>
-        Change Name
-        <input type="text" placeholder={title} bind:value={newName}>
-        <button on:click={handleChangeName}>Submit</button>
-    </label>
-    <div style="display: flex;">
-        {#each tags as tag}
-            <div on:click={() => handleConfirmDelete(tag.tag_id)}>
-                <Tag tag_id={tag.tag_id}/>
-            </div>
-        {/each}
+        <label>
+            Change Name
+            <input type="text" placeholder={title} bind:value={newName}>
+            <button on:click={handleChangeName}>Submit</button>
+        </label>
+        <div style="display: flex;">
+            {#each tags as tag}
+                <div on:click={() => handleConfirmDelete(tag.tag_id)}>
+                    <Tag tag_id={tag.tag_id}/>
+                </div>
+            {/each}
+        </div>
     </div>
 {/if}
 <div class="opener" on:click={() => openControls = !openControls}>
@@ -177,6 +179,10 @@
 {/if}
 
 <style>
+    .controls {
+        position: sticky;
+    }
+
     .delete-modal {
         position: absolute;
         top: 0;
