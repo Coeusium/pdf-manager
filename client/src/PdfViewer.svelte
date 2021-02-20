@@ -66,6 +66,24 @@
         const tmpSrc = src;
         src = '';
         setTimeout(() => src = tmpSrc, 0);
+        toDelete = '';
+    }
+
+    let minPage = 0;
+    let maxPage = 0;
+
+    async function handleDeletePagesRange() {
+        const pageList = [];
+        for(let i = minPage; i <= maxPage; i++) pageList.push(i - 1);
+        minPage = 0;
+        maxPage = 0;
+        await fetch(`/api/pdf/file?pdf_id=${pdf_id}&pages=${JSON.stringify(pageList.sort())}`, {method: 'DELETE'});
+        children = '';
+        // trigger refresh
+        const tmpSrc = src;
+        src = '';
+        setTimeout(() => src = tmpSrc, 0);
+        toDelete = '';
     }
 
     async function getTags() {
@@ -112,7 +130,12 @@
         <input type="text" placeholder="separate pages by commas" bind:value={toDelete}>
         <button on:click={handleDeletePages}>Submit</button>
     </label>
-
+    <label>
+        Delete Pages min/max
+        <input type="number" min={0} bind:value={minPage}>
+        <input type="number" min={0} bind:value={maxPage}>
+        <button on:click={handleDeletePagesRange}>Submit</button>
+    </label>
     <label>
         Add Tags
         <input type="text" placeholder="separate tags by commas" bind:value={newTags}>
