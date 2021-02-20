@@ -50,8 +50,9 @@ routes.delete('/file', async (ctx) => {
     const {pdf_id, pages} = ctx.query;
     const pdfInfo = await getPdf(dbInfo, pdf_id);
     const pdf = await PDFDocument.load(await fs.readFile(pdfInfo.file_location));
-    const finalPages = JSON.parse(pages).filter(e => e < pdf.getPageCount()).sort();
+    const finalPages = JSON.parse(pages).filter(e => e < pdf.getPageCount()).sort((a, b) => a - b);
     let pagesDeleted = 0;
+    console.log(finalPages);
     finalPages.forEach(e => pdf.removePage(e - pagesDeleted++));
     const finalDoc = await pdf.save();
     await fs.writeFile(pdfInfo.file_location, finalDoc);

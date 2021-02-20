@@ -73,11 +73,13 @@
     let maxPage = 0;
 
     async function handleDeletePagesRange() {
+        if(minPage === 0 || maxPage === 0) return;
         const pageList = [];
         for(let i = minPage; i <= maxPage; i++) pageList.push(i - 1);
+        console.log(pageList);
         minPage = 0;
         maxPage = 0;
-        await fetch(`/api/pdf/file?pdf_id=${pdf_id}&pages=${JSON.stringify(pageList.sort())}`, {method: 'DELETE'});
+        await fetch(`/api/pdf/file?pdf_id=${pdf_id}&pages=${JSON.stringify(pageList)}`, {method: 'DELETE'});
         children = '';
         // trigger refresh
         const tmpSrc = src;
