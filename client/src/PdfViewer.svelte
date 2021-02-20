@@ -11,6 +11,7 @@
     let toDelete = '';
     let newTags = '';
     let newName = '';
+    let openControls = false;
     let showModal = false;
     let src = `/api/pdf/file?pdf_id=${pdf_id}`;
     let tags = [];
@@ -29,7 +30,6 @@
     function handleConfirmDelete(tag_id) {
         tagToDelete = tag_id;
         showModal = true;
-        console.log(tagToDelete);
     }
 
     function unsetDelete() {
@@ -100,7 +100,7 @@
 
 </script>
 
-<div>
+{#if openControls}
     <label>
         Save Pages To Child
         <input type="text" placeholder="separate pages by commas" bind:value={children}>
@@ -124,14 +124,16 @@
         <input type="text" placeholder={title} bind:value={newName}>
         <button on:click={handleChangeName}>Submit</button>
     </label>
-</div>
-
-<div style="display: flex;">
-    {#each tags as tag}
-        <div on:click={() => handleConfirmDelete(tag.tag_id)}>
-            <Tag tag_id={tag.tag_id}/>
-        </div>
-    {/each}
+    <div style="display: flex;">
+        {#each tags as tag}
+            <div on:click={() => handleConfirmDelete(tag.tag_id)}>
+                <Tag tag_id={tag.tag_id}/>
+            </div>
+        {/each}
+    </div>
+{/if}
+<div class="opener" on:click={() => openControls = !openControls}>
+    {openControls ? 'Close' : 'Open'}
 </div>
 
 <iframe title={title} src={src}></iframe>

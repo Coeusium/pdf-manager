@@ -21,6 +21,14 @@
         ]);
     }
 
+    $: {
+        (async () => {
+            page;
+            limit;
+            await pdfSearch();
+        })();
+    }
+
     async function pdfSearch() {
         const searchTags = Array.from(selectedTags.keys());
         const res = await fetch(`/api/pdf?limit=${limit}&page=${page}&order=${order}&order_by=${orderedBy}&term=${term}&tags=${searchTags.length === 0 ? '' : JSON.stringify(searchTags)}`);
